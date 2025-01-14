@@ -38,6 +38,8 @@
                     var remaining = data.length;
 
                     data.forEach(function(client) {
+                        console.log('User:', client.User);
+                        console.log('PostalCode:', client.PostalCode);
                         geocodePostalCode(client.PostalCode, client.User, function() {
                             remaining--;
                             if (remaining === 0) {
