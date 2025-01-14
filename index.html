@@ -7,7 +7,7 @@
     <script>
         function initMap() {
             var map = new google.maps.Map(document.getElementById('map'), {
-                zoom: 4,
+                zoom: 14,
                 center: {lat: 45.781913, lng: -74.005561} // Center the map at an initial location
             });
 
@@ -21,6 +21,10 @@
                     var data = results.data;
 
                     data.forEach(function(client) {
+                        console.log('User:', client.User);
+                        console.log('Latitude:', client.Latitude);
+                        console.log('Longitude:', client.Longitude);
+
                         var latLng = new google.maps.LatLng(client.Latitude, client.Longitude);
                         var marker = new google.maps.Marker({
                             position: latLng,
@@ -42,7 +46,7 @@
                     markers.push(oldStoreMarker);
 
                     // Add 'Nouvelle adresse' marker
-                    var newStoreLocation = new google.maps.LatLng(45.759672,-74.024164); // Replace with actual coordinates
+                    var newStoreLocation = new google.maps.LatLng(45.759672, -74.024164); // Replace with actual coordinates
                     var newStoreMarker = new google.maps.Marker({
                         position: newStoreLocation,
                         map: map,
