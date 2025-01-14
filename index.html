@@ -4,6 +4,7 @@
     <title>Interactive Map</title>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCdxBhzzRpyNIVeYRz4-TkqrzxV7HXkU_I&libraries=places"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
     <script>
         function initMap() {
             var map = new google.maps.Map(document.getElementById('map'), {
@@ -12,17 +13,20 @@
             });
 
             var geocoder = new google.maps.Geocoder();
+            var markers = [];
 
             // Function to geocode postal codes and place markers
-            function geocodePostalCode(postalCode, title, icon) {
+            function geocodePostalCode(postalCode, title, icon, zIndex = 1) {
                 geocoder.geocode({'address': postalCode}, function(results, status) {
                     if (status === 'OK') {
                         var marker = new google.maps.Marker({
                             map: map,
                             position: results[0].geometry.location,
                             title: title,
-                            icon: icon
+                            icon: icon,
+                            zIndex: zIndex
                         });
+                        markers.push(marker);
                     } else {
                         console.error('Geocode was not successful for the following reason: ' + status);
                     }
@@ -39,9 +43,14 @@
                         geocodePostalCode(client.PostalCode, client.Name, 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png');
                     });
 
-                    // Add markers for old and new store locations
-                    geocodePostalCode('J7Y2T8', 'Old Store', 'http://maps.google.com/mapfiles/ms/icons/red-dot.png');
-                    geocodePostalCode('J7Y0L7', 'New Store', 'http://maps.google.com/mapfiles/ms/icons/green-dot.png');
+                    // Add markers for old and new store locations with higher zIndex
+                    geocodePostalCode('J7Y2T8', 'Ancienne adresse', 'http://maps.google.com/mapfiles/ms/icons/red-dot.png', 100);
+                    geocodePostalCode('J7Y0L7', 'New Store', 'http://maps.google.com/mapfiles/ms/icons/green-dot.png', 100);
+
+                    // Use MarkerClusterer to manage the client markers
+                    new MarkerClusterer(map, markers, {
+                        imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'
+                    });
                 }
             });
         }
