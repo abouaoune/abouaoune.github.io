@@ -30,7 +30,7 @@
             }
 
             // Load CSV data
-            Papa.parse('CL38_BaseMapData.csv', {
+            Papa.parse('CL38_PostalMapData.csv', {
                 download: true,
                 header: true,
                 complete: function(results) {
@@ -43,7 +43,7 @@
                             if (remaining === 0) {
                                 // All geocoding complete, generate new CSV
                                 var csv = Papa.unparse(resultsArray);
-                                downloadCSV(csv, 'Updated_CL38_MapData.csv');
+                                downloadCSV(csv, 'CL38_MapData.csv');
                             }
                         });
                     });
