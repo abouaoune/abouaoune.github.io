@@ -16,8 +16,8 @@
                     if (status === 'OK') {
                         var location = results[0].geometry.location;
                         resultsArray.push({
-                            Name: name,
-                            PostalCode:     ,
+                            User: name,
+                            PostalCode: postalCode,
                             Latitude: location.lat(),
                             Longitude: location.lng()
                         });
@@ -38,7 +38,7 @@
                     var remaining = data.length;
 
                     data.forEach(function(client) {
-                        geocodePostalCode(client.PostalCode, client.Name, function() {
+                        geocodePostalCode(client.PostalCode, client.User, function() {
                             remaining--;
                             if (remaining === 0) {
                                 // All geocoding complete, generate new CSV
