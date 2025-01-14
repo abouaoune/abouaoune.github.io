@@ -6,8 +6,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
     <script>
+        var map;
+        var oldStoreLocation;
+        var newStoreLocation;
+
         function initMap() {
-            var map = new google.maps.Map(document.getElementById('map'), {
+            map = new google.maps.Map(document.getElementById('map'), {
                 zoom: 14,
                 center: {lat: 45.781913, lng: -74.005561} // Center the map at an initial location
             });
@@ -37,7 +41,7 @@
                     });
 
                     // Add 'Ancienne adresse' marker
-                    var oldStoreLocation = new google.maps.LatLng(45.781913, -74.005561); // Replace with actual coordinates
+                    oldStoreLocation = new google.maps.LatLng(45.781913, -74.005561); // Replace with actual coordinates
                     var oldStoreMarker = new google.maps.Marker({
                         position: oldStoreLocation,
                         map: map,
@@ -47,7 +51,7 @@
                     markers.push(oldStoreMarker);
 
                     // Add 'Nouvelle adresse' marker
-                    var newStoreLocation = new google.maps.LatLng(45.759672, -74.024164); // Replace with actual coordinates
+                    newStoreLocation = new google.maps.LatLng(45.759672, -74.024164); // Replace with actual coordinates
                     var newStoreMarker = new google.maps.Marker({
                         position: newStoreLocation,
                         map: map,
