@@ -1,7 +1,53 @@
 <!DOCTYPE html>
 <html>
-<body>
-<h1>Hello World</h1>
-<p>I'm hosted with GitHub Pages.</p>
+<head>
+    <title>Interactive Map</title>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCdxBhzzRpyNIVeYRz4-TkqrzxV7HXkU_I&libraries=places"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script>
+        function initMap() {
+            var map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 12,
+                center: {lat: 45.781913, lng: -74.005561} // Initial center, can be any location
+            });
+
+            var geocoder = new google.maps.Geocoder();
+
+            // Function to geocode postal codes and place markers
+            function geocodePostalCode(postalCode, title, icon) {
+                geocoder.geocode({'address': postalCode}, function(results, status) {
+                    if (status === 'OK') {
+                        var marker = new google.maps.Marker({
+                            map: map,
+                            position: results[0].geometry.location,
+                            title: title,
+                            icon: icon
+                        });
+                    } else {
+                        console.error('Geocode was not successful for the following reason: ' + status);
+                    }
+                });
+            }
+
+            // Load CSV data
+            Papa.parse('CL38_MapData.csv', {
+                download: true,
+                header: true,
+                complete: function(results) {
+                    var data = results.data;
+                    data.forEach(function(client) {
+                        geocodePostalCode(client.PostalCode, client.Name, 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png');
+                    });
+
+                    // Add markers for old and new store locations
+                    geocodePostalCode('J7Y2T8', 'Old Store', 'http://maps.google.com/mapfiles/ms/icons/red-dot.png');
+                    geocodePostalCode('J7Y0L7', 'New Store', 'http://maps.google.com/mapfiles/ms/icons/green-dot.png');
+                }
+            });
+        }
+    </script>
+</head>
+<body onload="initMap()">
+    <div id="map" style="height: 500px; width: 100%;"></div>
 </body>
 </html>
