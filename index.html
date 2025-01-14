@@ -35,7 +35,7 @@
                             position: latLng,
                             map: map,
                             title: client.User,
-                            zIndex: 100,
+                            zIndex: 10,
                             icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'
                         });
                         markers.push(marker);
@@ -47,7 +47,7 @@
                         position: oldStoreLocation,
                         map: map,
                         title: 'Ancienne adresse',
-                            zIndex: 100,
+                        zIndex: 100,
                         icon: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png'
                     });
                     markers.push(oldStoreMarker);
@@ -58,6 +58,7 @@
                         position: newStoreLocation,
                         map: map,
                         title: 'Nouvelle adresse',
+                        zIndex: 100,
                         icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png'
                     });
                     markers.push(newStoreMarker);
