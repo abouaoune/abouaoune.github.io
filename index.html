@@ -1,153 +1,85 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Interactive Map</title>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC221DeGp0nazZR6DLQbmSULU662Nj6zuk&libraries=places,visualization"></script>
+    <title>Geocode Postal Codes</title>
+    
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC221DeGp0nazZR6DLQbmSULU662Nj6zuk&libraries=places"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
-    <script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
     <script>
-        var map;
-        var oldStoreLocation;
-        var newStoreLocation;
-        var heatmap;
-        var markerCluster;
-        var markers = [];
-
         function initMap() {
-            map = new google.maps.Map(document.getElementById('map'), {
-                zoom: 12,
-                center: {lat: 45.781913, lng: -74.005561} // Center the map at an initial location
-            });
+            var geocoder = new google.maps.Geocoder();
+            var resultsArray = [];
 
-            // Define custom icons
-            var blueIcon = {
-                url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png',
-                scaledSize: new google.maps.Size(32, 32) // Normal size
-            };
-            var yellowIcon = {
-                url: 'https://maps.google.com/mapfiles/ms/icons/yellow-dot.png',
-                scaledSize: new google.maps.Size(48, 48) // Larger size for hover
-            };
-
-            var redIcon = {
-                url: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
-                scaledSize: new google.maps.Size(51, 51) // Normal size
-            };
-            var greenIcon = {
-                url: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png',
-                scaledSize: new google.maps.Size(51, 51) // Larger size for hover
-            };
+            // Function to geocode postal codes and store results
+            function geocodePostalCode(postalCode, name, callback) {
+                geocoder.geocode({'address': postalCode}, function(results, status) {
+                    if (status === 'OK') {
+                        var location = results[0].geometry.location;
+                        resultsArray.push({
+                            Name: name,
+                            PostalCode:     ,
+                            Latitude: location.lat(),
+                            Longitude: location.lng()
+                        });
+                        callback();
+                    } else {
+                        console.error('Geocode was not successful for the following reason: ' + status);
+                        callback();
+                    }
+                });
+            }
 
             // Load CSV data
-            Papa.parse('CL38_MapData.csv', {
+            Papa.parse('CL38_BaseMapData.csv', {
                 download: true,
                 header: true,
                 complete: function(results) {
                     var data = results.data;
-                    var heatmapData = [];
+                    var remaining = data.length;
 
                     data.forEach(function(client) {
-                        var lat = parseFloat(client.Latitude);
-                        var lng = parseFloat(client.Longitude);
-
-                        if (!isNaN(lat) && !isNaN(lng)) {
-                            var latLng = new google.maps.LatLng(lat, lng);
-                            heatmapData.push(latLng);
-
-                            var marker = new google.maps.Marker({
-                                position: latLng,
-                                title: 'P' + client.User,
-                                zIndex: 10,
-                                icon: blueIcon
-                            });
-
-                            // Add hover effect
-                            google.maps.event.addListener(marker, 'mouseover', function() {
-                                marker.setIcon(yellowIcon);
-                            });
-                            google.maps.event.addListener(marker, 'mouseout', function() {
-                                marker.setIcon(blueIcon);
-                            });
-
-                            markers.push(marker);
-                            marker.setMap(map); // Add marker to the map directly
-                        } else {
-                            console.error('Invalid coordinates for client:', client);
-                        }
-                    });
-
-                    // Add 'Ancienne adresse' marker
-                    oldStoreLocation = new google.maps.LatLng(45.781913, -74.005561); // Replace with actual coordinates
-                    var oldStoreMarker = new google.maps.Marker({
-                        position: oldStoreLocation,
-                        map: map,
-                        title: 'Ancienne adresse',
-                        zIndex: 100,
-                        icon: redIcon
-                    });
-                    //markers.push(oldStoreMarker);
-
-                    // Add 'Nouvelle adresse' marker
-                    newStoreLocation = new google.maps.LatLng(45.759672, -74.024164); // Replace with actual coordinates
-                    var newStoreMarker = new google.maps.Marker({
-                        position: newStoreLocation,
-                        map: map,
-                        title: 'Nouvelle adresse',
-                        zIndex: 100,
-                        icon: greenIcon
-                    });
-                    //markers.push(newStoreMarker);
-
-                    // Initialize heatmap
-                    heatmap = new google.maps.visualization.HeatmapLayer({
-                        data: heatmapData,
-                        map: null // Start with heatmap hidden
-                    });
-
-                    // Initialize MarkerClusterer
-                    markerCluster = new MarkerClusterer(map, markers, {
-                        imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'
+                        geocodePostalCode(client.PostalCode, client.Name, function() {
+                            remaining--;
+                            if (remaining === 0) {
+                                // All geocoding complete, generate new CSV
+                                var csv = Papa.unparse(resultsArray);
+                                downloadCSV(csv, 'Updated_CL38_MapData.csv');
+                            }
+                        });
                     });
                 }
             });
         }
 
-        function toggleHeatmap() {
-            heatmap.setMap(heatmap.getMap() ? null : map);
-        }
+        // Function to download CSV file
+        function downloadCSV(csv, filename) {
+            var csvFile;
+            var downloadLink;
 
-        function toggleMarkerCluster() {
-            if (markerCluster.getMarkers().length > 0) {
-                markerCluster.clearMarkers();
-                markers.forEach(marker => marker.setMap(map));
-            } else {
-                markers.forEach(marker => marker.setMap(null));
-                markerCluster.addMarkers(markers);
-            }
-        }
+            // CSV file
+            csvFile = new Blob([csv], {type: "text/csv"});
 
-        function goToOldStore() {
-            if (oldStoreLocation) {
-                map.panTo(oldStoreLocation);
-                map.setZoom(15); // Adjust zoom level as needed
-            }
-        }
+            // Download link
+            downloadLink = document.createElement("a");
 
-        function goToNewStore() {
-            if (newStoreLocation) {
-                map.panTo(newStoreLocation);
-                map.setZoom(15); // Adjust zoom level as needed
-            }
+            // File name
+            downloadLink.download = filename;
+
+            // Create a link to the file
+            downloadLink.href = window.URL.createObjectURL(csvFile);
+
+            // Hide download link
+            downloadLink.style.display = "none";
+
+            // Add the link to DOM
+            document.body.appendChild(downloadLink);
+
+            // Click download link
+            downloadLink.click();
         }
     </script>
 </head>
 <body onload="initMap()">
-    <div id="map" style="height: 75%; width: 100%;"></div>
-    <div></div>
-    <button onclick="goToNewStore()">Aller à la nouvelle adresse</button>
-    <button onclick="goToOldStore()">Aller à l'ancienne adresse</button>
-    <!--<button onclick="toggleHeatmap()">Toggle Heatmap</button>
-    <button onclick="toggleMarkerCluster()">Toggle Marker Cluster</button>-->
-    <button onclick="window.location.href='geocode.html'">Geocode Postal Codes</button>
+    <h1>Geocoding Postal Codes...</h1>
 </body>
 </html>
