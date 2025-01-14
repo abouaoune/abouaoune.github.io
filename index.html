@@ -4,7 +4,7 @@
     <title>Interactive Map</title>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC221DeGp0nazZR6DLQbmSULU662Nj6zuk&libraries=places,visualization"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
-   <script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
+    <script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
     <script>
         var map;
         var oldStoreLocation;
@@ -21,20 +21,20 @@
 
             // Define custom icons
             var blueIcon = {
-                url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+                url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png',
                 scaledSize: new google.maps.Size(32, 32) // Normal size
             };
             var yellowIcon = {
-                url: 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png',
+                url: 'https://maps.google.com/mapfiles/ms/icons/yellow-dot.png',
                 scaledSize: new google.maps.Size(48, 48) // Larger size for hover
             };
 
             var redIcon = {
-                url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
+                url: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
                 scaledSize: new google.maps.Size(51, 51) // Normal size
             };
             var greenIcon = {
-                url: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
+                url: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png',
                 scaledSize: new google.maps.Size(51, 51) // Larger size for hover
             };
 
@@ -142,11 +142,12 @@
     </script>
 </head>
 <body onload="initMap()">
-    <div id="map" style="height: 500px; width: 100%;"></div>
+    <div id="map" style="height: 75%; width: 100%;"></div>
     <div></div>
     <button onclick="goToNewStore()">Aller à la nouvelle adresse</button>
     <button onclick="goToOldStore()">Aller à l'ancienne adresse</button>
-    <button onclick="toggleHeatmap()">Toggle Heatmap</button>
-    <button onclick="toggleMarkerCluster()">Toggle Marker Cluster</button>
+    <!--<button onclick="toggleHeatmap()">Toggle Heatmap</button>
+    <button onclick="toggleMarkerCluster()">Toggle Marker Cluster</button>-->
+    <button onclick="window.location.href='geocode.html'">Geocode Postal Codes</button>
 </body>
 </html>
