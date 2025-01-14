@@ -2,16 +2,10 @@
 <html>
 <head>
     <title>Geocode Postal Codes</title>
+    
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC221DeGp0nazZR6DLQbmSULU662Nj6zuk&libraries=places"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <script>
-        function loadGoogleMapsApi() {
-            const script = document.createElement('script');
-            // Use the API key injected during the build process
-            const apiKey = process.env.MY_KEY;
-            script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
-            script.onload = initMap;
-            document.head.appendChild(script);
-        }
-
         function initMap() {
             var geocoder = new google.maps.Geocoder();
             var resultsArray = [];
@@ -85,7 +79,7 @@
         }
     </script>
 </head>
-<body onload="loadGoogleMapsApi()">
+<body onload="initMap()">
     <h1>Geocoding Postal Codes...</h1>
 </body>
 </html>
