@@ -51,6 +51,7 @@
                         });
 
                         markers.push(marker);
+                        marker.setMap(map); // Add marker to the map directly
                     });
 
                     // Add 'Ancienne adresse' marker
@@ -82,7 +83,7 @@
                     });
 
                     // Initialize MarkerClusterer
-                    markerCluster = new MarkerClusterer(map, markers, {
+                    markerCluster = new MarkerClusterer(map, [], {
                         imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'
                     });
                 }
@@ -94,7 +95,7 @@
         }
 
         function toggleMarkerCluster() {
-            if (markerCluster.getMap()) {
+            if (markerCluster.getMarkers().length > 0) {
                 markerCluster.clearMarkers();
                 markers.forEach(marker => marker.setMap(map));
             } else {
@@ -120,6 +121,7 @@
 </head>
 <body onload="initMap()">
     <div id="map" style="height: 500px; width: 100%;"></div>
+    <div></div>
     <button onclick="goToNewStore()">Aller à la nouvelle adresse</button>
     <button onclick="goToOldStore()">Aller à l'ancienne adresse</button>
     <button onclick="toggleHeatmap()">Toggle Heatmap</button>
