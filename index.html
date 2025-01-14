@@ -44,8 +44,8 @@
                     });
 
                     // Add markers for old and new store locations with higher zIndex
-                    geocodePostalCode('J7Y2T8', 'Ancienne adresse', 'http://maps.google.com/mapfiles/ms/icons/red-dot.png', 100);
-                    geocodePostalCode('J7Y0L7', 'New Store', 'http://maps.google.com/mapfiles/ms/icons/green-dot.png', 100);
+                    geocodePostalCode('J7Y2T8', 'Old Store', 'data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><rect width="32" height="32" fill="red"/></svg>', 100);
+                    geocodePostalCode('J7Y0L7', 'New Store', 'data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><rect width="32" height="32" fill="green"/></svg>', 100);
 
                     // Use MarkerClusterer to manage the client markers
                     new MarkerClusterer(map, markers, {
