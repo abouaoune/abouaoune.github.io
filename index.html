@@ -4,7 +4,7 @@
     <title>Interactive Map</title>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC221DeGp0nazZR6DLQbmSULU662Nj6zuk&libraries=places,visualization"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
-    <script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
+   <script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
     <script>
         var map;
         var oldStoreLocation;
@@ -27,6 +27,15 @@
             var yellowIcon = {
                 url: 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png',
                 scaledSize: new google.maps.Size(48, 48) // Larger size for hover
+            };
+
+            var redIcon = {
+                url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
+                scaledSize: new google.maps.Size(51, 51) // Normal size
+            };
+            var greenIcon = {
+                url: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
+                scaledSize: new google.maps.Size(51, 51) // Larger size for hover
             };
 
             // Load CSV data
@@ -74,12 +83,9 @@
                         map: map,
                         title: 'Ancienne adresse',
                         zIndex: 100,
-                        icon: {
-                            url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
-                            scaledSize: new google.maps.Size(32, 32) // Normal size
-                        }
+                        icon: redIcon
                     });
-                    markers.push(oldStoreMarker);
+                    //markers.push(oldStoreMarker);
 
                     // Add 'Nouvelle adresse' marker
                     newStoreLocation = new google.maps.LatLng(45.759672, -74.024164); // Replace with actual coordinates
@@ -88,12 +94,9 @@
                         map: map,
                         title: 'Nouvelle adresse',
                         zIndex: 100,
-                        icon: {
-                            url: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
-                            scaledSize: new google.maps.Size(32, 32) // Normal size
-                        }
+                        icon: greenIcon
                     });
-                    markers.push(newStoreMarker);
+                    //markers.push(newStoreMarker);
 
                     // Initialize heatmap
                     heatmap = new google.maps.visualization.HeatmapLayer({
@@ -102,7 +105,7 @@
                     });
 
                     // Initialize MarkerClusterer
-                    markerCluster = new MarkerClusterer(map, [], {
+                    markerCluster = new MarkerClusterer(map, markers, {
                         imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'
                     });
                 }
