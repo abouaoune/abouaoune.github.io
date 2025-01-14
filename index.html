@@ -2,11 +2,12 @@
 <html>
 <head>
     <title>Geocode Postal Codes</title>
-    <script src="config.js"></script> <!-- Load config.js first -->
     <script>
         function loadGoogleMapsApi() {
             const script = document.createElement('script');
-            script.src = `https://maps.googleapis.com/maps/api/js?key=${config.MY_KEY}&libraries=places`;
+            // Use the API key injected during the build process
+            const apiKey = process.env.MY_KEY;
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
             script.onload = initMap;
             document.head.appendChild(script);
         }
