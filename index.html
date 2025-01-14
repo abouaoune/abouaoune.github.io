@@ -1,39 +1,35 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Interactive Map</title>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCdxBhzzRpyNIVeYRz4-TkqrzxV7HXkU_I&libraries=places"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
-    <script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
+    <title>Geocode Postal Codes</title>
+    <script src="config.js"></script> <!-- Load config.js first -->
     <script>
-        var map;
-        var oldStoreLocation;
-        var newStoreLocation;
+        function loadGoogleMapsApi() {
+            const script = document.createElement('script');
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${config.MY_KEY}&libraries=places`;
+            script.onload = initMap;
+            document.head.appendChild(script);
+        }
 
         function initMap() {
-            map = new google.maps.Map(document.getElementById('map'), {
-                zoom: 12,
-                center: {lat: 45.781913, lng: -74.005561} // Initial center, can be any location
-            });
-
             var geocoder = new google.maps.Geocoder();
-            var markers = [];
+            var resultsArray = [];
 
-            // Function to geocode postal codes and place markers
-            function geocodePostalCode(postalCode, title, icon, zIndex = 1, callback) {
+            // Function to geocode postal codes and store results
+            function geocodePostalCode(postalCode, name, callback) {
                 geocoder.geocode({'address': postalCode}, function(results, status) {
                     if (status === 'OK') {
-                        var marker = new google.maps.Marker({
-                            map: map,
-                            position: results[0].geometry.location,
-                            title: title,
-                            icon: icon,
-                            zIndex: zIndex
+                        var location = results[0].geometry.location;
+                        resultsArray.push({
+                            Name: name,
+                            PostalCode: postalCode,
+                            Latitude: location.lat(),
+                            Longitude: location.lng()
                         });
-                        markers.push(marker);
-                        if (callback) callback(results[0].geometry.location);
+                        callback();
                     } else {
                         console.error('Geocode was not successful for the following reason: ' + status);
+                        callback();
                     }
                 });
             }
@@ -44,43 +40,51 @@
                 header: true,
                 complete: function(results) {
                     var data = results.data;
+                    var remaining = data.length;
+
                     data.forEach(function(client) {
-                        geocodePostalCode(client.PostalCode, client.Name, 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png');
-                    });
-
-                    geocodePostalCode('J7Y2T8', 'Ancienne adresse', 'http://maps.google.com/mapfiles/ms/icons/red-dot.png', 100, function(location) {
-                        oldStoreLocation = location;
-                    });
-                    geocodePostalCode('J7Y0L7', 'Nouvelle adresse', 'http://maps.google.com/mapfiles/ms/icons/green-dot.png', 100, function(location) {
-                        newStoreLocation = location;
-                    });
-
-                    // Use MarkerClusterer to manage the client markers
-                    new MarkerClusterer(map, markers, {
-                        imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'
+                        geocodePostalCode(client.PostalCode, client.Name, function() {
+                            remaining--;
+                            if (remaining === 0) {
+                                // All geocoding complete, generate new CSV
+                                var csv = Papa.unparse(resultsArray);
+                                downloadCSV(csv, 'Updated_CL38_MapData.csv');
+                            }
+                        });
                     });
                 }
             });
         }
 
-        function goToOldStore() {
-            if (oldStoreLocation) {
-                map.panTo(oldStoreLocation);
-                map.setZoom(15); // Adjust zoom level as needed
-            }
-        }
+        // Function to download CSV file
+        function downloadCSV(csv, filename) {
+            var csvFile;
+            var downloadLink;
 
-        function goToNewStore() {
-            if (newStoreLocation) {
-                map.panTo(newStoreLocation);
-                map.setZoom(15); // Adjust zoom level as needed
-            }
+            // CSV file
+            csvFile = new Blob([csv], {type: "text/csv"});
+
+            // Download link
+            downloadLink = document.createElement("a");
+
+            // File name
+            downloadLink.download = filename;
+
+            // Create a link to the file
+            downloadLink.href = window.URL.createObjectURL(csvFile);
+
+            // Hide download link
+            downloadLink.style.display = "none";
+
+            // Add the link to DOM
+            document.body.appendChild(downloadLink);
+
+            // Click download link
+            downloadLink.click();
         }
     </script>
 </head>
-<body onload="initMap()">
-    <div id="map" style="height: 500px; width: 100%;"></div>
-    <button onclick="goToOldStore()">Go to Old Store</button>
-    <button onclick="goToNewStore()">Go to New Store</button>
+<body onload="loadGoogleMapsApi()">
+    <h1>Geocoding Postal Codes...</h1>
 </body>
 </html>
