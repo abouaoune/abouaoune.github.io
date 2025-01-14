@@ -1,33 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Geocode Postal Codes</title>
-    
+    <title>Interactive Map</title>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC221DeGp0nazZR6DLQbmSULU662Nj6zuk&libraries=places"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <script>
         function initMap() {
-            var geocoder = new google.maps.Geocoder();
-            var resultsArray = [];
+            var map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 4,
+                center: {lat: 45.781913, lng: -74.005561} // Center the map at an initial location
+            });
 
-            // Function to geocode postal codes and store results
-            function geocodePostalCode(postalCode, name, callback) {
-                geocoder.geocode({'address': postalCode}, function(results, status) {
-                    if (status === 'OK') {
-                        var location = results[0].geometry.location;
-                        resultsArray.push({
-                            Name: name,
-                            PostalCode: postalCode,
-                            Latitude: location.lat(),
-                            Longitude: location.lng()
-                        });
-                        callback();
-                    } else {
-                        console.error('Geocode was not successful for the following reason: ' + status);
-                        callback();
-                    }
-                });
-            }
+            var markers = [];
 
             // Load CSV data
             Papa.parse('CL38_MapData.csv', {
@@ -35,51 +19,64 @@
                 header: true,
                 complete: function(results) {
                     var data = results.data;
-                    var remaining = data.length;
 
                     data.forEach(function(client) {
-                        geocodePostalCode(client.PostalCode, client.Name, function() {
-                            remaining--;
-                            if (remaining === 0) {
-                                // All geocoding complete, generate new CSV
-                                var csv = Papa.unparse(resultsArray);
-                                downloadCSV(csv, 'Updated_CL38_MapData.csv');
-                            }
+                        var latLng = new google.maps.LatLng(client.Latitude, client.Longitude);
+                        var marker = new google.maps.Marker({
+                            position: latLng,
+                            map: map,
+                            title: client.User,
+                            icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'
                         });
+                        markers.push(marker);
+                    });
+
+                    // Add 'Ancienne adresse' marker
+                    var oldStoreLocation = new google.maps.LatLng(45.781913, -74.005561); // Replace with actual coordinates
+                    var oldStoreMarker = new google.maps.Marker({
+                        position: oldStoreLocation,
+                        map: map,
+                        title: 'Ancienne adresse',
+                        icon: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png'
+                    });
+                    markers.push(oldStoreMarker);
+
+                    // Add 'Nouvelle adresse' marker
+                    var newStoreLocation = new google.maps.LatLng(45.759672,-74.024164); // Replace with actual coordinates
+                    var newStoreMarker = new google.maps.Marker({
+                        position: newStoreLocation,
+                        map: map,
+                        title: 'Nouvelle adresse',
+                        icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png'
+                    });
+                    markers.push(newStoreMarker);
+
+                    // Use MarkerClusterer to manage the client markers
+                    new MarkerClusterer(map, markers, {
+                        imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'
                     });
                 }
             });
         }
+        
+        function goToOldStore() {
+            if (oldStoreLocation) {
+                map.panTo(oldStoreLocation);
+                map.setZoom(15); // Adjust zoom level as needed
+            }
+        }
 
-        // Function to download CSV file
-        function downloadCSV(csv, filename) {
-            var csvFile;
-            var downloadLink;
-
-            // CSV file
-            csvFile = new Blob([csv], {type: "text/csv"});
-
-            // Download link
-            downloadLink = document.createElement("a");
-
-            // File name
-            downloadLink.download = filename;
-
-            // Create a link to the file
-            downloadLink.href = window.URL.createObjectURL(csvFile);
-
-            // Hide download link
-            downloadLink.style.display = "none";
-
-            // Add the link to DOM
-            document.body.appendChild(downloadLink);
-
-            // Click download link
-            downloadLink.click();
+        function goToNewStore() {
+            if (newStoreLocation) {
+                map.panTo(newStoreLocation);
+                map.setZoom(15); // Adjust zoom level as needed
+            }
         }
     </script>
 </head>
 <body onload="initMap()">
-    <h1>Geocoding Postal Codes...</h1>
+    <div id="map" style="height: 500px; width: 100%;"></div>
+    <button onclick="goToNewStore()">Aller à la nouvelle adresse</button>
+    <button onclick="goToOldStore()">Aller à l'ancienne adresse</button>
 </body>
 </html>
