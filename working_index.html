@@ -2,16 +2,13 @@
 <html>
 <head>
     <title>Interactive Map</title>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC221DeGp0nazZR6DLQbmSULU662Nj6zuk&libraries=places,visualization"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC221DeGp0nazZR6DLQbmSULU662Nj6zuk&libraries=places"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
     <script>
         var map;
         var oldStoreLocation;
         var newStoreLocation;
-        var heatmap;
-        var markerCluster;
-        var markers = [];
 
         function initMap() {
             map = new google.maps.Map(document.getElementById('map'), {
@@ -19,13 +16,14 @@
                 center: {lat: 45.781913, lng: -74.005561} // Center the map at an initial location
             });
 
+            var markers = [];
+
             // Load CSV data
             Papa.parse('CL38_MapData.csv', {
                 download: true,
                 header: true,
                 complete: function(results) {
                     var data = results.data;
-                    var heatmapData = [];
 
                     data.forEach(function(client) {
                         console.log('User:', client.User);
@@ -33,23 +31,13 @@
                         console.log('Longitude:', client.Longitude);
 
                         var latLng = new google.maps.LatLng(client.Latitude, client.Longitude);
-                        heatmapData.push(latLng);
-
                         var marker = new google.maps.Marker({
                             position: latLng,
-                            title: 'P' + client.User,
+                            map: map,
+                            title: client.User,
                             zIndex: 10,
                             icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'
                         });
-
-                        // Add hover effect
-                        google.maps.event.addListener(marker, 'mouseover', function() {
-                            marker.setIcon('http://maps.google.com/mapfiles/ms/icons/yellow-dot.png');
-                        });
-                        google.maps.event.addListener(marker, 'mouseout', function() {
-                            marker.setIcon('http://maps.google.com/mapfiles/ms/icons/blue-dot.png');
-                        });
-
                         markers.push(marker);
                     });
 
@@ -75,34 +63,14 @@
                     });
                     markers.push(newStoreMarker);
 
-                    // Initialize heatmap
-                    heatmap = new google.maps.visualization.HeatmapLayer({
-                        data: heatmapData,
-                        map: null // Start with heatmap hidden
-                    });
-
-                    // Initialize MarkerClusterer
-                    markerCluster = new MarkerClusterer(map, markers, {
+                    // Use MarkerClusterer to manage the client markers
+                    new MarkerClusterer(map, markers, {
                         imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'
                     });
                 }
             });
         }
-
-        function toggleHeatmap() {
-            heatmap.setMap(heatmap.getMap() ? null : map);
-        }
-
-        function toggleMarkerCluster() {
-            if (markerCluster.getMap()) {
-                markerCluster.clearMarkers();
-                markers.forEach(marker => marker.setMap(map));
-            } else {
-                markers.forEach(marker => marker.setMap(null));
-                markerCluster.addMarkers(markers);
-            }
-        }
-
+        
         function goToOldStore() {
             if (oldStoreLocation) {
                 map.panTo(oldStoreLocation);
@@ -122,7 +90,5 @@
     <div id="map" style="height: 500px; width: 100%;"></div>
     <button onclick="goToNewStore()">Aller à la nouvelle adresse</button>
     <button onclick="goToOldStore()">Aller à l'ancienne adresse</button>
-    <button onclick="toggleHeatmap()">Toggle Heatmap</button>
-    <button onclick="toggleMarkerCluster()">Toggle Marker Cluster</button>
 </body>
 </html>
