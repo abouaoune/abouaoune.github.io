@@ -6,8 +6,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
     <script>
+        var map;
+        var oldStoreLocation;
+        var newStoreLocation;
+
         function initMap() {
-            var map = new google.maps.Map(document.getElementById('map'), {
+            map = new google.maps.Map(document.getElementById('map'), {
                 zoom: 12,
                 center: {lat: 45.781913, lng: -74.005561} // Initial center, can be any location
             });
@@ -16,7 +20,7 @@
             var markers = [];
 
             // Function to geocode postal codes and place markers
-            function geocodePostalCode(postalCode, title, icon, zIndex = 1) {
+            function geocodePostalCode(postalCode, title, icon, zIndex = 1, callback) {
                 geocoder.geocode({'address': postalCode}, function(results, status) {
                     if (status === 'OK') {
                         var marker = new google.maps.Marker({
@@ -27,6 +31,7 @@
                             zIndex: zIndex
                         });
                         markers.push(marker);
+                        if (callback) callback(results[0].geometry.location);
                     } else {
                         console.error('Geocode was not successful for the following reason: ' + status);
                     }
@@ -43,9 +48,12 @@
                         geocodePostalCode(client.PostalCode, client.Name, 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png');
                     });
 
-                    // Add markers for old and new store locations with higher zIndex
-                    geocodePostalCode('J7Y2T8', 'Old Store', 'data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><rect width="32" height="32" fill="red"/></svg>', 100);
-                    geocodePostalCode('J7Y0L7', 'New Store', 'data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><rect width="32" height="32" fill="green"/></svg>', 100);
+                    geocodePostalCode('J7Y2T8', 'Ancienne adresse', 'http://maps.google.com/mapfiles/ms/icons/red-dot.png', 100, function(location) {
+                        oldStoreLocation = location;
+                    });
+                    geocodePostalCode('J7Y0L7', 'Nouvelle adresse', 'http://maps.google.com/mapfiles/ms/icons/green-dot.png', 100, function(location) {
+                        newStoreLocation = location;
+                    });
 
                     // Use MarkerClusterer to manage the client markers
                     new MarkerClusterer(map, markers, {
@@ -54,9 +62,25 @@
                 }
             });
         }
+
+        function goToOldStore() {
+            if (oldStoreLocation) {
+                map.panTo(oldStoreLocation);
+                map.setZoom(15); // Adjust zoom level as needed
+            }
+        }
+
+        function goToNewStore() {
+            if (newStoreLocation) {
+                map.panTo(newStoreLocation);
+                map.setZoom(15); // Adjust zoom level as needed
+            }
+        }
     </script>
 </head>
 <body onload="initMap()">
     <div id="map" style="height: 500px; width: 100%;"></div>
+    <button onclick="goToOldStore()">Go to Old Store</button>
+    <button onclick="goToNewStore()">Go to New Store</button>
 </body>
 </html>
