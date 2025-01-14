@@ -16,7 +16,7 @@
                     if (status === 'OK') {
                         var location = results[0].geometry.location;
                         resultsArray.push({
-                            User: name,
+                            Name: name,
                             PostalCode: postalCode,
                             Latitude: location.lat(),
                             Longitude: location.lng()
@@ -30,7 +30,7 @@
             }
 
             // Load CSV data
-            Papa.parse('CL38_PostalMapData.csv', {
+            Papa.parse('CL38_MapData.csv', {
                 download: true,
                 header: true,
                 complete: function(results) {
@@ -38,14 +38,12 @@
                     var remaining = data.length;
 
                     data.forEach(function(client) {
-                        console.log('User:', client.User);
-                        console.log('PostalCode:', client.PostalCode);
-                        geocodePostalCode(client.PostalCode, client.User, function() {
+                        geocodePostalCode(client.PostalCode, client.Name, function() {
                             remaining--;
                             if (remaining === 0) {
                                 // All geocoding complete, generate new CSV
                                 var csv = Papa.unparse(resultsArray);
-                                downloadCSV(csv, 'CL38_MapData.csv');
+                                downloadCSV(csv, 'Updated_CL38_MapData.csv');
                             }
                         });
                     });
@@ -82,6 +80,6 @@
     </script>
 </head>
 <body onload="initMap()">
-    <h1>Geocoding Postal Codes...</h1>
+    <h1>Geocoding Postal Codes... !</h1>
 </body>
 </html>
