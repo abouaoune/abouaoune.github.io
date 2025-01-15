@@ -13,11 +13,10 @@
         var markerCluster;
         var markers = [];
 
-        async function initMap() {
+        function initMap() {
             map = new google.maps.Map(document.getElementById('map'), {
                 zoom: 12,
-                center: {lat: 45.781913, lng: -74.005561}, // Center the map at an initial location
-                mapId: 'DEMO_MAP_ID' // Replace with your actual map ID
+                center: {lat: 45.781913, lng: -74.005561} // Center the map at an initial location
             });
 
             // Define custom icons
@@ -55,7 +54,7 @@
                             var latLng = new google.maps.LatLng(lat, lng);
                             heatmapData.push(latLng);
 
-                            var marker = new google.maps.marker.AdvancedMarkerElement({
+                            var marker = new google.maps.Marker({
                                 position: latLng,
                                 title: 'P' + client.User,
                                 zIndex: 10,
@@ -63,15 +62,15 @@
                             });
 
                             // Add hover effect
-                            marker.addListener('mouseover', function() {
+                            google.maps.event.addListener(marker, 'mouseover', function() {
                                 marker.setIcon(yellowIcon);
                             });
-                            marker.addListener('mouseout', function() {
+                            google.maps.event.addListener(marker, 'mouseout', function() {
                                 marker.setIcon(blueIcon);
                             });
 
                             markers.push(marker);
-                            marker.map = map; // Add marker to the map directly
+                            marker.setMap(map); // Add marker to the map directly
                         } else {
                             console.error('Invalid coordinates for client:', client);
                         }
@@ -79,7 +78,7 @@
 
                     // Add 'Ancienne adresse' marker
                     oldStoreLocation = new google.maps.LatLng(45.781913, -74.005561); // Replace with actual coordinates
-                    var oldStoreMarker = new google.maps.marker.AdvancedMarkerElement({
+                    var oldStoreMarker = new google.maps.Marker({
                         position: oldStoreLocation,
                         map: map,
                         title: 'Ancienne adresse, 511, rue Laviolette Saint-Jérôme, QC J7Y 2T8',
@@ -90,7 +89,7 @@
 
                     // Add 'Nouvelle adresse' marker
                     newStoreLocation = new google.maps.LatLng(45.759672, -74.024164); // Replace with actual coordinates
-                    var newStoreMarker = new google.maps.marker.AdvancedMarkerElement({
+                    var newStoreMarker = new google.maps.Marker({
                         position: newStoreLocation,
                         map: map,
                         title: 'Nouvelle adresse, Rue Lamontagne & Boulevard Rolland-Godard, Saint-Jérôme, QC J7Y 0L7',
@@ -121,9 +120,9 @@
         function toggleMarkerCluster() {
             if (markerCluster.getMarkers().length > 0) {
                 markerCluster.clearMarkers();
-                markers.forEach(marker => marker.map = map);
+                markers.forEach(marker => marker.setMap(map));
             } else {
-                markers.forEach(marker => marker.map = null);
+                markers.forEach(marker => marker.setMap(null));
                 markerCluster.addMarkers(markers);
             }
         }
@@ -148,8 +147,8 @@
     <div></div>
     <button onclick="goToNewStore()">Aller à la nouvelle adresse</button>
     <button onclick="goToOldStore()">Aller à l'ancienne adresse</button>
-    <!--<button onclick="toggleHeatmap()">Toggle Heatmap</button>
-    <button onclick="toggleMarkerCluster()">Toggle Marker Cluster</button>-->
+    <button onclick="toggleHeatmap()">Toggle Heatmap</button>
+    <button onclick="toggleMarkerCluster()">Toggle Marker Cluster</button>
     <button onclick="window.location.href='geocode.html'">Geocode Postal Codes</button>
 </body>
 </html>
