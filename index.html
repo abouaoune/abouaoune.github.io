@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Interactive Map</title>
-    <script src="https://maps.googleapis.com/maps/api/js?key=MyApiKey&libraries=places,visualization,marker"></script>
+    <title>Interactive Map St-Jérôme</title>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC221DeGp0nazZR6DLQbmSULU662Nj6zuk&libraries=places,visualization,marker"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <script src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js"></script>
     <style>
+        body {
+            font-family: Calibri, sans-serif;
+        }
         #map {
             height: 600px;
             width: 100%;
@@ -22,10 +25,12 @@
             position: relative;
             cursor: pointer;
             margin-right: 10px; /* Add space between buttons */
+            font-family: Calibri, sans-serif;
         }
         .toggle-container {
             display: inline-block;
-            margin-left: 25px; /* Add space before toggle button */
+            margin-left: 20px; /* Add space before toggle button */
+            font-family: Calibri, sans-serif;
         }
         .toggle-button {
             display: inline-block;
@@ -51,11 +56,12 @@
             background-color: #4caf50;
         }
         .toggle-button.on::before {
-            left: 42px;
+            left: 32px;
         }
         .client-count {
             margin-top: 10px;
             text-align: center;
+            font-family: Calibri, sans-serif;
         }
     </style>
     <script>
@@ -103,37 +109,6 @@
                     var heatmapData = [];
                     var activeClients = 0;
 
-                    data.forEach(function(client) {
-                        var lat = parseFloat(client.Latitude);
-                        var lng = parseFloat(client.Longitude);
-
-                        if (!isNaN(lat) && !isNaN(lng)) {
-                            var latLng = new google.maps.LatLng(lat, lng);
-                            heatmapData.push(latLng);
-
-                            var marker = new google.maps.Marker({
-                                position: latLng,
-                                title: 'P' + client.User,
-                                zIndex: 10,
-                                icon: blueIcon
-                            });
-
-                            // Add hover effect
-                            google.maps.event.addListener(marker, 'mouseover', function() {
-                                marker.setIcon(yellowIcon);
-                            });
-                            google.maps.event.addListener(marker, 'mouseout', function() {
-                                marker.setIcon(blueIcon);
-                            });
-
-                            markers.push(marker);
-                            marker.setMap(map); // Add marker to the map directly
-                            activeClients++;
-                        } else {
-                            console.error('Invalid coordinates for client:', client);
-                        }
-                    });
-
                     // Add 'Ancienne adresse' marker
                     oldStoreLocation = new google.maps.LatLng(45.781913, -74.005561); // Replace with actual coordinates
                     oldStoreMarker = new google.maps.Marker({
@@ -154,6 +129,52 @@
                         icon: greenIcon
                     });
 
+                    // Calculate midpoint
+                    var midpoint = new google.maps.LatLng(
+                        (oldStoreLocation.lat() + newStoreLocation.lat()) / 2,
+                        (oldStoreLocation.lng() + newStoreLocation.lng()) / 2
+                    );
+
+                    data.forEach(function(client) {
+                        var lat = parseFloat(client.Latitude);
+                        var lng = parseFloat(client.Longitude);
+
+                        if (!isNaN(lat) && !isNaN(lng)) {
+                            var latLng = new google.maps.LatLng(lat, lng);
+
+                            // Calculate distances
+                            var distanceToOld = google.maps.geometry.spherical.computeDistanceBetween(latLng, oldStoreLocation);
+                            var distanceToNew = google.maps.geometry.spherical.computeDistanceBetween(latLng, newStoreLocation);
+                            var distanceToMid = google.maps.geometry.spherical.computeDistanceBetween(latLng, midpoint);
+
+                            // Check if within 150 km
+                            if (distanceToOld <= 150000 || distanceToNew <= 150000 || distanceToMid <= 150000) {
+                                heatmapData.push(latLng);
+
+                                var marker = new google.maps.Marker({
+                                    position: latLng,
+                                    title: 'P' + client.User,
+                                    zIndex: 10,
+                                    icon: blueIcon
+                                });
+
+                                // Add hover effect
+                                google.maps.event.addListener(marker, 'mouseover', function() {
+                                    marker.setIcon(yellowIcon);
+                                });
+                                google.maps.event.addListener(marker, 'mouseout', function() {
+                                    marker.setIcon(blueIcon);
+                                });
+
+                                markers.push(marker);
+                                marker.setMap(map); // Add marker to the map directly
+                                activeClients++;
+                            }
+                        } else {
+                            console.error('Invalid coordinates for client:', client);
+                        }
+                    });
+
                     // Initialize heatmap
                     heatmap = new google.maps.visualization.HeatmapLayer({
                         data: heatmapData,
@@ -168,7 +189,7 @@
                     });
 
                     // Display the number of active clients
-                    document.getElementById('client-count').innerText = 'Active Clients: ' + activeClients;
+                    document.getElementById('client-count').innerText = 'Patient actifs (RV < 2 ans): ' + activeClients;
                 }
             });
         }
@@ -205,14 +226,13 @@
             }
         }
     </script>
-</head>
 <body onload="initMap()">
     <div id="map"></div>
     <div class="controls">
-        <button class="default-button" onclick="goToNewStore()">Aller à la nouvelle adresse</button>
-        <button class="default-button" onclick="goToOldStore()">Aller à l'ancienne adresse</button>
+        <button class="default-button" onclick="goToNewStore()">Aller à la nouvelle adresse (Old location)</button>
+        <button class="default-button" onclick="goToOldStore()">Aller à l'ancienne adresse (New location)</button>
         <div class="toggle-container">
-            <span>Toggle Clustering</span>
+            <span>Activer le regroupement des points (clustering)</span>
             <div id="toggle-cluster" class="toggle-button" onclick="toggleMarkerCluster()"></div>
         </div>
     </div>
