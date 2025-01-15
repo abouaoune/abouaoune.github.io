@@ -2,12 +2,14 @@
 <html>
 <head>
     <title>Geocode Postal Codes</title>
+    
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC221DeGp0nazZR6DLQbmSULU662Nj6zuk&libraries=places"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <script>
         function initMap() {
             var geocoder = new google.maps.Geocoder();
             var resultsArray = [];
+            var errorArray = [];
 
             // Function to geocode postal codes and store results
             function geocodePostalCode(postalCode, name, callback) {
@@ -15,21 +17,25 @@
                     if (status === 'OK') {
                         var location = results[0].geometry.location;
                         resultsArray.push({
-                            Name: User,
+                            User: name,
                             PostalCode: postalCode,
                             Latitude: location.lat(),
                             Longitude: location.lng()
                         });
-                        callback();
                     } else {
                         console.error('Geocode was not successful for the following reason: ' + status);
-                        callback();
+                        errorArray.push({
+                            User: name,
+                            PostalCode: postalCode,
+                            Error: status
+                        });
                     }
+                    callback();
                 });
             }
 
             // Load CSV data
-            Papa.parse('CL38_BaseMapData.csv', {
+            Papa.parse('CL38_PostalMapData.csv', {
                 download: true,
                 header: true,
                 complete: function(results) {
@@ -37,12 +43,17 @@
                     var remaining = data.length;
 
                     data.forEach(function(client) {
-                        geocodePostalCode(client.PostalCode, client.Name, function() {
+                        console.log('User:', client.User);
+                        console.log('PostalCode:', client.PostalCode);
+                        geocodePostalCode(client.PostalCode, client.User, function() {
                             remaining--;
                             if (remaining === 0) {
-                                // All geocoding complete, generate new CSV
+                                // All geocoding complete, generate new CSVs
                                 var csv = Papa.unparse(resultsArray);
                                 downloadCSV(csv, 'CL38_MapData.csv');
+
+                                var errorCsv = Papa.unparse(errorArray);
+                                downloadCSV(errorCsv, 'CL38_MapData_Errors.csv');
                             }
                         });
                     });
