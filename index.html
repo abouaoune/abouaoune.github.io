@@ -2,9 +2,45 @@
 <html>
 <head>
     <title>Interactive Map</title>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC221DeGp0nazZR6DLQbmSULU662Nj6zuk&libraries=places,visualization,marker"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=MyApiKey&libraries=places,visualization,marker"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <script src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js"></script>
+    <style>
+        #map {
+            height: 640px;
+            width: 100%;
+        }
+        .controls {
+            margin-top: 10px;
+            text-align: center;
+        }
+        .toggle-button {
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+            background-color: #ccc;
+            border-radius: 15px;
+            position: relative;
+            cursor: pointer;
+        }
+        .toggle-button::before {
+            content: '';
+            position: absolute;
+            width: 26px;
+            height: 26px;
+            background-color: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: all 0.3s;
+        }
+        .toggle-button.on {
+            background-color: #4caf50;
+        }
+        .toggle-button.on::before {
+            left: 32px;
+        }
+    </style>
     <script>
         var map;
         var oldStoreLocation;
@@ -32,11 +68,11 @@
 
             var redIcon = {
                 url: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
-                scaledSize: new google.maps.Size(51, 51) // Normal size
+                scaledSize: new google.maps.Size(48, 48) // Normal size
             };
             var greenIcon = {
                 url: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png',
-                scaledSize: new google.maps.Size(51, 51) // Larger size for hover
+                scaledSize: new google.maps.Size(48, 48) // Larger size for hover
             };
 
             // Load CSV data
@@ -86,7 +122,6 @@
                         zIndex: 100,
                         icon: redIcon
                     });
-                    markers.push(oldStoreMarker);
 
                     // Add 'Nouvelle adresse' marker
                     newStoreLocation = new google.maps.LatLng(45.759672, -74.024164); // Replace with actual coordinates
@@ -97,7 +132,6 @@
                         zIndex: 100,
                         icon: greenIcon
                     });
-                    markers.push(newStoreMarker);
 
                     // Initialize heatmap
                     heatmap = new google.maps.visualization.HeatmapLayer({
@@ -108,7 +142,7 @@
                     // Initialize MarkerClusterer
                     markerCluster = new markerClusterer.MarkerClusterer({
                         map: map,
-                        markers: markers
+                        markers: [] // Start with clustering disabled
                     });
                 }
             });
@@ -119,12 +153,15 @@
         }
 
         function toggleMarkerCluster() {
+            var toggleButton = document.getElementById('toggle-cluster');
             if (isClustered) {
                 markerCluster.clearMarkers();
                 markers.forEach(marker => marker.setMap(map));
+                toggleButton.classList.remove('on');
             } else {
                 markers.forEach(marker => marker.setMap(null));
-                markerCluster.addMarkers(markers);
+                markerCluster.addMarkers(markers.filter(marker => marker !== oldStoreMarker && marker !== newStoreMarker));
+                toggleButton.classList.add('on');
             }
             isClustered = !isClustered;
         }
@@ -145,12 +182,11 @@
     </script>
 </head>
 <body onload="initMap()">
-    <div id="map" style="height: 640px; width: 100%;"></div>
-    <div></div>
-    <button onclick="goToNewStore()">Aller à la nouvelle adresse</button>
-    <button onclick="goToOldStore()">Aller à l'ancienne adresse</button>
-    <button onclick="toggleHeatmap()">Toggle Heatmap</button>
-    <button onclick="toggleMarkerCluster()">Toggle Marker Cluster</button>
-    <button onclick="window.location.href='geocode.html'">Geocode Postal Codes</button>
+    <div id="map"></div>
+    <div class="controls">
+        <button onclick="goToNewStore()">Aller à la nouvelle adresse</button>
+        <button onclick="goToOldStore()">Aller à l'ancienne adresse</button>
+        <div id="toggle-cluster" class="toggle-button" onclick="toggleMarkerCluster()"></div>
+    </div>
 </body>
 </html>
