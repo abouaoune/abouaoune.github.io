@@ -2,9 +2,9 @@
 <html>
 <head>
     <title>Interactive Map</title>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC221DeGp0nazZR6DLQbmSULU662Nj6zuk&libraries=places,visualization"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC221DeGp0nazZR6DLQbmSULU662Nj6zuk&libraries=places,visualization,marker"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
-    <script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
+    <script src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js"></script>
     <script>
         var map;
         var oldStoreLocation;
@@ -13,10 +13,11 @@
         var markerCluster;
         var markers = [];
 
-        function initMap() {
+        async function initMap() {
             map = new google.maps.Map(document.getElementById('map'), {
                 zoom: 12,
-                center: {lat: 45.781913, lng: -74.005561} // Center the map at an initial location
+                center: {lat: 45.781913, lng: -74.005561}, // Center the map at an initial location
+                mapId: 'DEMO_MAP_ID' // Replace with your actual map ID
             });
 
             // Define custom icons
@@ -54,7 +55,7 @@
                             var latLng = new google.maps.LatLng(lat, lng);
                             heatmapData.push(latLng);
 
-                            var marker = new google.maps.Marker({
+                            var marker = new google.maps.marker.AdvancedMarkerElement({
                                 position: latLng,
                                 title: 'P' + client.User,
                                 zIndex: 10,
@@ -62,15 +63,15 @@
                             });
 
                             // Add hover effect
-                            google.maps.event.addListener(marker, 'mouseover', function() {
+                            marker.addListener('mouseover', function() {
                                 marker.setIcon(yellowIcon);
                             });
-                            google.maps.event.addListener(marker, 'mouseout', function() {
+                            marker.addListener('mouseout', function() {
                                 marker.setIcon(blueIcon);
                             });
 
                             markers.push(marker);
-                            marker.setMap(map); // Add marker to the map directly
+                            marker.map = map; // Add marker to the map directly
                         } else {
                             console.error('Invalid coordinates for client:', client);
                         }
@@ -78,25 +79,25 @@
 
                     // Add 'Ancienne adresse' marker
                     oldStoreLocation = new google.maps.LatLng(45.781913, -74.005561); // Replace with actual coordinates
-                    var oldStoreMarker = new google.maps.Marker({
+                    var oldStoreMarker = new google.maps.marker.AdvancedMarkerElement({
                         position: oldStoreLocation,
                         map: map,
                         title: 'Ancienne adresse, 511, rue Laviolette Saint-Jérôme, QC J7Y 2T8',
                         zIndex: 100,
                         icon: redIcon
                     });
-                    //markers.push(oldStoreMarker);
+                    markers.push(oldStoreMarker);
 
                     // Add 'Nouvelle adresse' marker
                     newStoreLocation = new google.maps.LatLng(45.759672, -74.024164); // Replace with actual coordinates
-                    var newStoreMarker = new google.maps.Marker({
+                    var newStoreMarker = new google.maps.marker.AdvancedMarkerElement({
                         position: newStoreLocation,
                         map: map,
                         title: 'Nouvelle adresse, Rue Lamontagne & Boulevard Rolland-Godard, Saint-Jérôme, QC J7Y 0L7',
                         zIndex: 100,
                         icon: greenIcon
                     });
-                    //markers.push(newStoreMarker);
+                    markers.push(newStoreMarker);
 
                     // Initialize heatmap
                     heatmap = new google.maps.visualization.HeatmapLayer({
@@ -105,8 +106,9 @@
                     });
 
                     // Initialize MarkerClusterer
-                    markerCluster = new MarkerClusterer(map, markers, {
-                        imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'
+                    markerCluster = new markerClusterer.MarkerClusterer({
+                        map: map,
+                        markers: markers
                     });
                 }
             });
@@ -119,9 +121,9 @@
         function toggleMarkerCluster() {
             if (markerCluster.getMarkers().length > 0) {
                 markerCluster.clearMarkers();
-                markers.forEach(marker => marker.setMap(map));
+                markers.forEach(marker => marker.map = map);
             } else {
-                markers.forEach(marker => marker.setMap(null));
+                markers.forEach(marker => marker.map = null);
                 markerCluster.addMarkers(markers);
             }
         }
