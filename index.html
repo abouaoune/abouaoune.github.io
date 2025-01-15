@@ -200,6 +200,8 @@
             } else {
                 markers.forEach(marker => marker.setMap(null));
                 markerCluster.addMarkers(markers.filter(marker => marker !== oldStoreMarker && marker !== newStoreMarker));
+                oldStoreMarker.setMap(map); // Ensure old store marker is always visible
+                newStoreMarker.setMap(map); // Ensure new store marker is always visible
                 toggleButton.classList.add('on');
             }
             isClustered = !isClustered;
