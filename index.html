@@ -141,7 +141,7 @@
                             var distanceToNew = google.maps.geometry.spherical.computeDistanceBetween(latLng, newStoreLocation);
 
                             // Check if within 150 km
-                            if (distanceToOld <= 100000 || distanceToNew <= 100000) {
+                            if (distanceToOld <= 150000 || distanceToNew <= 150000) {
                                 heatmapData.push(latLng);
 
                                 var marker = new google.maps.Marker({
