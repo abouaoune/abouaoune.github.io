@@ -12,6 +12,7 @@
         var heatmap;
         var markerCluster;
         var markers = [];
+        var isClustered = false;
 
         function initMap() {
             map = new google.maps.Map(document.getElementById('map'), {
@@ -118,13 +119,14 @@
         }
 
         function toggleMarkerCluster() {
-            if (markerCluster.getMarkers().length > 0) {
+            if (isClustered) {
                 markerCluster.clearMarkers();
                 markers.forEach(marker => marker.setMap(map));
             } else {
                 markers.forEach(marker => marker.setMap(null));
                 markerCluster.addMarkers(markers);
             }
+            isClustered = !isClustered;
         }
 
         function goToOldStore() {
@@ -143,7 +145,7 @@
     </script>
 </head>
 <body onload="initMap()">
-    <div id="map" style="height: 640px; width: 100%;"></div>
+    <div id="map" style="height: 75%; width: 100%;"></div>
     <div></div>
     <button onclick="goToNewStore()">Aller à la nouvelle adresse</button>
     <button onclick="goToOldStore()">Aller à l'ancienne adresse</button>
