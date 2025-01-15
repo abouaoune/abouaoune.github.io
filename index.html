@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>Interactive Map</title>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC221DeGp0nazZR6DLQbmSULU662Nj6zuk&libraries=places,visualization,marker"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=MyApiKey&libraries=places,visualization,marker"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <script src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js"></script>
     <style>
@@ -21,8 +21,12 @@
             border-radius: 8px;
             position: relative;
             cursor: pointer;
+            margin-right: 10px; /* Add space between buttons */
         }
-
+        .toggle-container {
+            display: inline-block;
+            margin-left: 25px; /* Add space before toggle button */
+        }
         .toggle-button {
             display: inline-block;
             width: 60px;
@@ -47,7 +51,11 @@
             background-color: #4caf50;
         }
         .toggle-button.on::before {
-            left: 32px;
+            left: 42px;
+        }
+        .client-count {
+            margin-top: 10px;
+            text-align: center;
         }
     </style>
     <script>
@@ -79,11 +87,11 @@
 
             var redIcon = {
                 url: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
-                scaledSize: new google.maps.Size(45, 45) // Normal size
+                scaledSize: new google.maps.Size(45, 45)
             };
             var greenIcon = {
                 url: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png',
-                scaledSize: new google.maps.Size(45, 45) // Larger size for hover
+                scaledSize: new google.maps.Size(45, 45)
             };
 
             // Load CSV data
@@ -93,6 +101,7 @@
                 complete: function(results) {
                     var data = results.data;
                     var heatmapData = [];
+                    var activeClients = 0;
 
                     data.forEach(function(client) {
                         var lat = parseFloat(client.Latitude);
@@ -119,6 +128,7 @@
 
                             markers.push(marker);
                             marker.setMap(map); // Add marker to the map directly
+                            activeClients++;
                         } else {
                             console.error('Invalid coordinates for client:', client);
                         }
@@ -153,8 +163,12 @@
                     // Initialize MarkerClusterer
                     markerCluster = new markerClusterer.MarkerClusterer({
                         map: map,
-                        markers: [] // Start with clustering disabled
+                        markers: [], // Start with clustering disabled
+                        gridSize: 60 // Increase the radius for forming clusters
                     });
+
+                    // Display the number of active clients
+                    document.getElementById('client-count').innerText = 'Active Clients: ' + activeClients;
                 }
             });
         }
@@ -180,14 +194,14 @@
         function goToOldStore() {
             if (oldStoreLocation) {
                 map.panTo(oldStoreLocation);
-                map.setZoom(15); // Adjust zoom level as needed
+                map.setZoom(15);
             }
         }
 
         function goToNewStore() {
             if (newStoreLocation) {
                 map.panTo(newStoreLocation);
-                map.setZoom(15); // Adjust zoom level as needed
+                map.setZoom(15);
             }
         }
     </script>
@@ -197,7 +211,11 @@
     <div class="controls">
         <button class="default-button" onclick="goToNewStore()">Aller à la nouvelle adresse</button>
         <button class="default-button" onclick="goToOldStore()">Aller à l'ancienne adresse</button>
-        <div id="toggle-cluster" class="toggle-button" onclick="toggleMarkerCluster()"></div>
+        <div class="toggle-container">
+            <span>Toggle Clustering</span>
+            <div id="toggle-cluster" class="toggle-button" onclick="toggleMarkerCluster()"></div>
+        </div>
     </div>
+    <div id="client-count" class="client-count"></div>
 </body>
 </html>
