@@ -56,7 +56,7 @@
             background-color: #4caf50;
         }
         .toggle-button.on::before {
-            left: 32px;
+            left: 42px;
         }
         .client-count {
             margin-top: 10px;
@@ -129,12 +129,6 @@
                         icon: greenIcon
                     });
 
-                    // Calculate midpoint
-                    var midpoint = new google.maps.LatLng(
-                        (oldStoreLocation.lat() + newStoreLocation.lat()) / 2,
-                        (oldStoreLocation.lng() + newStoreLocation.lng()) / 2
-                    );
-
                     data.forEach(function(client) {
                         var lat = parseFloat(client.Latitude);
                         var lng = parseFloat(client.Longitude);
@@ -145,10 +139,9 @@
                             // Calculate distances
                             var distanceToOld = google.maps.geometry.spherical.computeDistanceBetween(latLng, oldStoreLocation);
                             var distanceToNew = google.maps.geometry.spherical.computeDistanceBetween(latLng, newStoreLocation);
-                            var distanceToMid = google.maps.geometry.spherical.computeDistanceBetween(latLng, midpoint);
 
                             // Check if within 150 km
-                            if (distanceToOld <= 150000 || distanceToNew <= 150000 || distanceToMid <= 150000) {
+                            if (distanceToOld <= 100000 || distanceToNew <= 100000) {
                                 heatmapData.push(latLng);
 
                                 var marker = new google.maps.Marker({
@@ -185,7 +178,7 @@
                     markerCluster = new markerClusterer.MarkerClusterer({
                         map: map,
                         markers: [], // Start with clustering disabled
-                        gridSize: 60 // Increase the radius for forming clusters
+                        gridSize: 80 // Increase the radius for forming clusters
                     });
 
                     // Display the number of active clients
