@@ -7,17 +7,26 @@
     <script src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js"></script>
     <style>
         #map {
-            height: 640px;
+            height: 600px;
             width: 100%;
         }
         .controls {
             margin-top: 10px;
             text-align: center;
         }
+        .default-button {
+            display: inline-block;
+            height: 25px;
+            background-color: #ccc;
+            border-radius: 8px;
+            position: relative;
+            cursor: pointer;
+        }
+
         .toggle-button {
             display: inline-block;
             width: 60px;
-            height: 30px;
+            height: 20px;
             background-color: #ccc;
             border-radius: 15px;
             position: relative;
@@ -26,8 +35,8 @@
         .toggle-button::before {
             content: '';
             position: absolute;
-            width: 26px;
-            height: 26px;
+            width: 16px;
+            height: 16px;
             background-color: white;
             border-radius: 50%;
             top: 2px;
@@ -44,7 +53,9 @@
     <script>
         var map;
         var oldStoreLocation;
+        var oldStoreMarker;
         var newStoreLocation;
+        var newStoreMarker;
         var heatmap;
         var markerCluster;
         var markers = [];
@@ -115,7 +126,7 @@
 
                     // Add 'Ancienne adresse' marker
                     oldStoreLocation = new google.maps.LatLng(45.781913, -74.005561); // Replace with actual coordinates
-                    var oldStoreMarker = new google.maps.Marker({
+                    oldStoreMarker = new google.maps.Marker({
                         position: oldStoreLocation,
                         map: map,
                         title: 'Ancienne adresse, 511, rue Laviolette Saint-Jérôme, QC J7Y 2T8',
@@ -125,7 +136,7 @@
 
                     // Add 'Nouvelle adresse' marker
                     newStoreLocation = new google.maps.LatLng(45.759672, -74.024164); // Replace with actual coordinates
-                    var newStoreMarker = new google.maps.Marker({
+                    newStoreMarker = new google.maps.Marker({
                         position: newStoreLocation,
                         map: map,
                         title: 'Nouvelle adresse, Rue Lamontagne & Boulevard Rolland-Godard, Saint-Jérôme, QC J7Y 0L7',
@@ -184,8 +195,8 @@
 <body onload="initMap()">
     <div id="map"></div>
     <div class="controls">
-        <button onclick="goToNewStore()">Aller à la nouvelle adresse</button>
-        <button onclick="goToOldStore()">Aller à l'ancienne adresse</button>
+        <button class="default-button" onclick="goToNewStore()">Aller à la nouvelle adresse</button>
+        <button class="default-button" onclick="goToOldStore()">Aller à l'ancienne adresse</button>
         <div id="toggle-cluster" class="toggle-button" onclick="toggleMarkerCluster()"></div>
     </div>
 </body>
