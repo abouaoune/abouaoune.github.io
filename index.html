@@ -88,7 +88,7 @@
         function initMap() {
 
             map = new google.maps.Map(document.getElementById('map'), {
-                zoom: 12,
+                zoom: 10,
                 center: {lat: 45.880662, lng: -72.484140} // Center the map at an initial location
             });
 
@@ -164,7 +164,7 @@
                             allClients.push({ ...client, distanceToHdV });
                         }
                     });
-                    
+
                     // Update markers based on initial radius
                     updateMarkers(circle.getRadius());
                 }
