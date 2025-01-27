@@ -193,6 +193,9 @@
             if (isClustered && markerCluster) {
                 markerCluster.clearMarkers();
                 markerCluster.addMarkers(markers.filter(marker => marker.getVisible()));
+            } 
+            if (isClustered == false) {
+                markers.forEach(marker => marker.setMap(map))
             }
         }
 
