@@ -99,7 +99,7 @@
                 strokeOpacity: 0.6,
                 strokeWeight: 2,
                 fillColor: '#FF0000',
-                fillOpacity: 0.35,
+                fillOpacity: 0.20,
                 map: map,
                 center: {lat: 45.880662, lng: -72.484140},
                 radius: 30000 // 30 km
@@ -139,7 +139,7 @@
                             var distanceToHdV = google.maps.geometry.spherical.computeDistanceBetween(latLng, HdV_Drummondville_Location);
 
                             // Check if within 50 km
-                            if (distanceToHdV <= 40000) {
+                            if (distanceToHdV <= 50000) {
                                 var marker = new google.maps.Marker({
                                     position: latLng,
                                     title: 'P' + client.User + ' - ' + client.PostalCode,
