@@ -66,8 +66,10 @@
     </style>
     <script>
         var map;
-        var HdV_Drummondville_Location;
-        var HdV_Drummondville_Marker;
+        var oldStoreLocation;
+        var oldStoreMarker;
+        var newStoreLocation;
+        var newStoreMarker;
         var markerCluster;
         var markers = [];
         var isClustered = false;
@@ -88,25 +90,40 @@
                 scaledSize: new google.maps.Size(42, 42) // Larger size for hover
             };
 
+            var redIcon = {
+                url: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
+                scaledSize: new google.maps.Size(45, 45)
+            };
             var greenIcon = {
                 url: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png',
                 scaledSize: new google.maps.Size(45, 45)
             };
 
             // Load CSV data
-            Papa.parse('CL_Drummondville_MapData_200.csv', {
+            Papa.parse('CL38_MapData.csv', {
                 download: true,
                 header: true,
                 complete: function(results) {
                     var data = results.data;
+                    var heatmapData = [];
                     var activeClients = 0;
 
-                    // Add 'Nouvelle adresse' marker
-                    HdV_Drummondville_Location = new google.maps.LatLng(45.880662, -72.484140); // Replace with actual coordinates
-                    HdV_Drummondville_Marker = new google.maps.Marker({
-                        position: HdV_Drummondville_Location,
+                    // Add 'Ancienne adresse' marker
+                    oldStoreLocation = new google.maps.LatLng(45.781913, -74.005561); // Replace with actual coordinates
+                    oldStoreMarker = new google.maps.Marker({
+                        position: oldStoreLocation,
                         map: map,
-                        title: 'Hôtel de Ville de Drummondville, 415 Rue Lindsay, Drummondville, QC J2B 6W3',
+                        title: 'Ancienne adresse, 511, rue Laviolette Saint-Jérôme, QC J7Y 2T8',
+                        zIndex: 1000, // Ensure it is on top
+                        icon: redIcon
+                    });
+
+                    // Add 'Nouvelle adresse' marker
+                    newStoreLocation = new google.maps.LatLng(45.759672, -74.024164); // Replace with actual coordinates
+                    newStoreMarker = new google.maps.Marker({
+                        position: newStoreLocation,
+                        map: map,
+                        title: 'Nouvelle adresse, Rue Lamontagne & Boulevard Rolland-Godard, Saint-Jérôme, QC J7Y 0L7',
                         zIndex: 1000, // Ensure it is on top
                         icon: greenIcon
                     });
@@ -119,10 +136,11 @@
                             var latLng = new google.maps.LatLng(lat, lng);
 
                             // Calculate distances
-                            var distanceToHdV = google.maps.geometry.spherical.computeDistanceBetween(latLng, HdV_Drummondville_Location);
+                            var distanceToOld = google.maps.geometry.spherical.computeDistanceBetween(latLng, oldStoreLocation);
+                            var distanceToNew = google.maps.geometry.spherical.computeDistanceBetween(latLng, newStoreLocation);
 
                             // Check if within 150 km
-                            if (distanceToHdV <= 75000) {
+                            if (distanceToOld <= 150000 || distanceToNew <= 150000) {
                                 var marker = new google.maps.Marker({
                                     position: latLng,
                                     title: 'P' + client.User,
@@ -168,16 +186,24 @@
                 toggleButton.classList.remove('on');
             } else {
                 markers.forEach(marker => marker.setMap(null));
-                markerCluster.addMarkers(markers.filter(marker => marker !== HdV_Drummondville_Marker));
-                HdV_Drummondville_Marker.setMap(map); // Ensure new store marker is always visible
+                markerCluster.addMarkers(markers.filter(marker => marker !== oldStoreMarker && marker !== newStoreMarker));
+                oldStoreMarker.setMap(map); // Ensure old store marker is always visible
+                newStoreMarker.setMap(map); // Ensure new store marker is always visible
                 toggleButton.classList.add('on');
             }
             isClustered = !isClustered;
         }
 
-        function goToHdV_Drummondville() {
-            if (HdV_Drummondville_Location) {
-                map.panTo(HdV_Drummondville_Location);
+        function goToOldStore() {
+            if (oldStoreLocation) {
+                map.panTo(oldStoreLocation);
+                map.setZoom(15);
+            }
+        }
+
+        function goToNewStore() {
+            if (newStoreLocation) {
+                map.panTo(newStoreLocation);
                 map.setZoom(15);
             }
         }
@@ -185,7 +211,8 @@
 <body onload="initMap()">
     <div id="map"></div>
     <div class="controls">
-        <button class="default-button" onclick="goToHdV_Drummondville()">Aller à Hôtel de Ville de Drummondville</button>
+        <button class="default-button" onclick="goToNewStore()">Aller à la nouvelle adresse (New location)</button>
+        <button class="default-button" onclick="goToOldStore()">Aller à l'ancienne adresse (Old location)</button>
         <div class="toggle-container">
             <span>Activer le regroupement des points (clustering)</span>
             <div id="toggle-cluster" class="toggle-button" onclick="toggleMarkerCluster()"></div>
