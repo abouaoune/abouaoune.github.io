@@ -63,6 +63,13 @@
             text-align: center;
             font-family: Calibri, sans-serif;
         }
+        .slider-container {
+            text-align: center;
+            margin-top: 10px;
+        }
+        .slider {
+            width: 300px;
+        }
     </style>
     <script>
         var map;
@@ -71,6 +78,8 @@
         var markerCluster;
         var markers = [];
         var isClustered = false;
+        var circle;
+        var allClients = [];
 
         function initMap() {
             map = new google.maps.Map(document.getElementById('map'), {
@@ -94,7 +103,7 @@
             };
 
             // Add circle to map
-            var circle = new google.maps.Circle({
+            circle = new google.maps.Circle({
                 strokeColor: '#FF0000',
                 strokeOpacity: 0.6,
                 strokeWeight: 2,
@@ -125,12 +134,7 @@
 
                     data.forEach(function(client) {
                         var lat = parseFloat(client.Latitude);
-                        //console.log('client.Latitude = ', client.Latitude)
-                        //console.log('lat =', lat)
-
                         var lng = parseFloat(client.Longitude);
-                        //console.log('client.Latitude = ', client.Longitude)
-                        //console.log('lng =', lng)
 
                         if (!isNaN(lat) && !isNaN(lng)) {
                             var latLng = new google.maps.LatLng(lat, lng);
@@ -138,30 +142,26 @@
                             // Calculate distances
                             var distanceToHdV = google.maps.geometry.spherical.computeDistanceBetween(latLng, HdV_Drummondville_Location);
 
-                            // Check if within 50 km
-                            if (distanceToHdV <= 30000) {
-                                var marker = new google.maps.Marker({
-                                    position: latLng,
-                                    title: 'P' + client.User + ' - ' + client.PostalCode,
-                                    zIndex: 10,
-                                    icon: blueIcon
-                                });
+                            client.distanceToHdV = distanceToHdV; // Add distance to client data
 
-                                // Add hover effect
-                                google.maps.event.addListener(marker, 'mouseover', function() {
-                                    marker.setIcon(yellowIcon);
-                                });
-                                google.maps.event.addListener(marker, 'mouseout', function() {
-                                    marker.setIcon(blueIcon);
-                                });
+                            var marker = new google.maps.Marker({
+                                position: latLng,
+                                title: 'P' + client.User + ' - ' + client.PostalCode,
+                                zIndex: 10,
+                                icon: blueIcon
+                            });
 
-                                markers.push(marker);
-                                marker.setMap(map); // Add marker to the map directly
-                                activeClients++;
-                            }
-                        } /*else {
-                            console.error('Invalid coordinates for client:', client);
-                        }*/
+                            // Add hover effect
+                            google.maps.event.addListener(marker, 'mouseover', function() {
+                                marker.setIcon(yellowIcon);
+                            });
+                            google.maps.event.addListener(marker, 'mouseout', function() {
+                                marker.setIcon(blueIcon);
+                            });
+
+                            markers.push(marker);
+                            allClients.push(client);
+                        }
                     });
 
                     // Initialize MarkerClusterer
@@ -171,10 +171,28 @@
                         gridSize: 80 // Increase the radius for forming clusters
                     });
 
-                    // Display the number of active clients
-                    document.getElementById('client-count').innerText = 'Patient actifs (RV < 2 ans): ' + activeClients;
+                    // Update markers based on initial radius
+                    updateMarkers(circle.getRadius());
                 }
             });
+        }
+
+        function updateMarkers(radius) {
+            var activeClients = 0;
+            markers.forEach(marker => marker.setMap(null)); // Clear all markers
+
+            allClients.forEach(function(client, index) {
+                if (client.distanceToHdV <= radius) {
+                    markers[index].setMap(map); // Add marker to the map
+                    activeClients++;
+                }
+            });
+
+            // Update the circle radius
+            circle.setRadius(radius);
+
+            // Display the number of active clients
+            document.getElementById('client-count').innerText = 'Patient actifs (RV < 2 ans): ' + activeClients;
         }
 
         function toggleMarkerCluster() {
@@ -208,6 +226,16 @@
             <div id="toggle-cluster" class="toggle-button" onclick="toggleMarkerCluster()"></div>
         </div>
     </div>
+    <div class="slider-container">
+        <label for="radius-slider">Rayon considéré (km): <span id="radius-value">30</span></label>
+        <input type="range" id="radius-slider" class="slider" min="1" max="100" value="30" step="5" oninput="updateRadius(this.value)">
+    </div>
     <div id="client-count" class="client-count"></div>
+    <script>
+        function updateRadius(value) {
+            document.getElementById('radius-value').innerText = value;
+            updateMarkers(value * 1000); // Convert km to meters
+        }
+    </script>
 </body>
 </html>
