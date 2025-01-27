@@ -126,11 +126,11 @@
                             // Calculate distances
                             var distanceToHdV = google.maps.geometry.spherical.computeDistanceBetween(latLng, HdV_Drummondville_Location);
 
-                            // Check if within 150 km
-                            if (distanceToHdV <= 75000) {
+                            // Check if within 50 km
+                            if (distanceToHdV <= 50000) {
                                 var marker = new google.maps.Marker({
                                     position: latLng,
-                                    title: 'P' + client.User,
+                                    title: 'P' + client.User + ' - ' + client.PostalCode,
                                     zIndex: 10,
                                     icon: blueIcon
                                 });
