@@ -75,7 +75,7 @@
         function initMap() {
             map = new google.maps.Map(document.getElementById('map'), {
                 zoom: 12,
-                center: {lat: 45.781913, lng: -74.005561} // Center the map at an initial location
+                center: {lat: 45.880662, lng: -72.484140} // Center the map at an initial location
             });
 
             // Define custom icons
@@ -113,7 +113,12 @@
 
                     data.forEach(function(client) {
                         var lat = parseFloat(client.Latitude);
+                        console.log('client.Latitude = ', client.Latitude)
+                        console.log('lat =', lat)
+
                         var lng = parseFloat(client.Longitude);
+                        console.log('client.Latitude = ', client.Longitude)
+                        console.log('lng =', lng)
 
                         if (!isNaN(lat) && !isNaN(lng)) {
                             var latLng = new google.maps.LatLng(lat, lng);
