@@ -1,136 +1,21 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Interactive Map Drummondville</title>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC221DeGp0nazZR6DLQbmSULU662Nj6zuk&libraries=places,visualization,geometry,marker"></script>
+    <title>Update CSV with Distances</title>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC221DeGp0nazZR6DLQbmSULU662Nj6zuk&libraries=geometry"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
-    <script src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js"></script>
-    <style>
-        body {
-            font-family: Calibri, sans-serif;
-        }
-        #map {
-            height: 600px;
-            width: 100%;
-        }
-        .controls {
-            margin-top: 10px;
-            text-align: center;
-        }
-        .default-button {
-            display: inline-block;
-            height: 25px;
-            background-color: #ccc;
-            border-radius: 8px;
-            position: relative;
-            cursor: pointer;
-            margin-right: 10px; /* Add space between buttons */
-            font-family: Calibri, sans-serif;
-        }
-        .toggle-container {
-            display: inline-block;
-            margin-left: 20px; /* Add space before toggle button */
-            font-family: Calibri, sans-serif;
-        }
-        .toggle-button {
-            display: inline-block;
-            width: 60px;
-            height: 20px;
-            background-color: #ccc;
-            border-radius: 15px;
-            position: relative;
-            cursor: pointer;
-        }
-        .toggle-button::before {
-            content: '';
-            position: absolute;
-            width: 16px;
-            height: 16px;
-            background-color: white;
-            border-radius: 50%;
-            top: 2px;
-            left: 2px;
-            transition: all 0.3s;
-        }
-        .toggle-button.on {
-            background-color: #4caf50;
-        }
-        .toggle-button.on::before {
-            left: 42px;
-        }
-        .client-count {
-            margin-top: 10px;
-            text-align: center;
-            font-family: Calibri, sans-serif;
-        }
-        .slider-container {
-            text-align: center;
-            margin-top: 10px;
-        }
-        .slider {
-            width: 300px;
-        }
-    </style>
     <script>
-        var map;
-        var HdV_Drummondville_Location;
-        var HdV_Drummondville_Marker;
-        var markerCluster;
-        var markers = [];
-        var isClustered = false;
-        var circle;
-        var allClients = [];
-
         function initMap() {
-            map = new google.maps.Map(document.getElementById('map'), {
-                zoom: 12,
-                center: {lat: 45.880662, lng: -72.484140} // Center the map at an initial location
-            });
-
-            // Define custom icons
-            var blueIcon = {
-                url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png',
-                scaledSize: new google.maps.Size(32, 32) // Normal size
-            };
-            var yellowIcon = {
-                url: 'https://maps.google.com/mapfiles/ms/icons/yellow-dot.png',
-                scaledSize: new google.maps.Size(42, 42) // Larger size for hover
-            };
-
-            var greenIcon = {
-                url: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png',
-                scaledSize: new google.maps.Size(45, 45)
-            };
-
-            // Add circle to map
-            circle = new google.maps.Circle({
-                strokeColor: '#FF0000',
-                strokeOpacity: 0.6,
-                strokeWeight: 2,
-                fillColor: '#FF0000',
-                fillOpacity: 0.20,
-                map: map,
-                center: {lat: 45.880662, lng: -72.484140},
-                radius: 30000 // 30 km
-            });
+            var HdV_Drummondville_Location = new google.maps.LatLng(45.880662, -72.484140);
+            var resultsArray = [];
 
             // Load CSV data
-            Papa.parse('CL_Drummondville_MapData_9k.csv', { //'CL_Drummondville_MapData.csv'
+            Papa.parse('CL_Drummondville_MapData_9k.csv', {
                 download: true,
                 header: true,
                 complete: function(results) {
                     var data = results.data;
-                    var activeClients = 0;
-
-                    // Add 'Nouvelle adresse' marker
-                    HdV_Drummondville_Location = new google.maps.LatLng(45.880662, -72.484140); // Replace with actual coordinates
-                    HdV_Drummondville_Marker = new google.maps.Marker({
-                        position: HdV_Drummondville_Location,
-                        map: map,
-                        title: 'Hôtel de Ville de Drummondville, 415 Rue Lindsay, Drummondville, QC J2B 6W3',
-                        zIndex: 1000, // Ensure it is on top
-                        icon: greenIcon
-                    });
+                    var remaining = data.length;
 
                     data.forEach(function(client) {
                         var lat = parseFloat(client.Latitude);
@@ -138,104 +23,56 @@
 
                         if (!isNaN(lat) && !isNaN(lng)) {
                             var latLng = new google.maps.LatLng(lat, lng);
-
-                            // Calculate distances
                             var distanceToHdV = google.maps.geometry.spherical.computeDistanceBetween(latLng, HdV_Drummondville_Location);
 
-                            client.distanceToHdV = distanceToHdV; // Add distance to client data
-
-                            var marker = new google.maps.Marker({
-                                position: latLng,
-                                title: 'P' + client.User + ' - ' + client.PostalCode,
-                                zIndex: 10,
-                                icon: blueIcon
+                            resultsArray.push({
+                                ...client,
+                                distanceToHdV: distanceToHdV
                             });
+                        } else {
+                            console.error('Invalid coordinates for client:', client);
+                        }
 
-                            // Add hover effect
-                            google.maps.event.addListener(marker, 'mouseover', function() {
-                                marker.setIcon(yellowIcon);
-                            });
-                            google.maps.event.addListener(marker, 'mouseout', function() {
-                                marker.setIcon(blueIcon);
-                            });
-
-                            markers.push(marker);
-                            allClients.push(client);
+                        remaining--;
+                        if (remaining === 0) {
+                            // All calculations complete, generate new CSV
+                            var csv = Papa.unparse(resultsArray);
+                            downloadCSV(csv, 'CL_Drummondville_MapData_9k_updated.csv');
                         }
                     });
-
-                    // Initialize MarkerClusterer
-                    markerCluster = new markerClusterer.MarkerClusterer({
-                        map: map,
-                        markers: [], // Start with clustering disabled
-                        gridSize: 80 // Increase the radius for forming clusters
-                    });
-
-                    // Update markers based on initial radius
-                    updateMarkers(circle.getRadius());
                 }
             });
         }
 
-        function updateMarkers(radius) {
-            var activeClients = 0;
-            markers.forEach(marker => marker.setMap(null)); // Clear all markers
+        // Function to download CSV file
+        function downloadCSV(csv, filename) {
+            var csvFile;
+            var downloadLink;
 
-            allClients.forEach(function(client, index) {
-                if (client.distanceToHdV <= radius) {
-                    markers[index].setMap(map); // Add marker to the map
-                    activeClients++;
-                }
-            });
+            // CSV file
+            csvFile = new Blob([csv], {type: "text/csv"});
 
-            // Update the circle radius
-            circle.setRadius(radius);
+            // Download link
+            downloadLink = document.createElement("a");
 
-            // Display the number of active clients
-            document.getElementById('client-count').innerText = 'Patient actifs (RV < 2 ans): ' + activeClients;
-        }
+            // File name
+            downloadLink.download = filename;
 
-        function toggleMarkerCluster() {
-            var toggleButton = document.getElementById('toggle-cluster');
-            if (isClustered) {
-                markerCluster.clearMarkers();
-                markers.forEach(marker => marker.setMap(map));
-                toggleButton.classList.remove('on');
-            } else {
-                markers.forEach(marker => marker.setMap(null));
-                markerCluster.addMarkers(markers.filter(marker => marker !== HdV_Drummondville_Marker));
-                HdV_Drummondville_Marker.setMap(map); // Ensure new store marker is always visible
-                toggleButton.classList.add('on');
-            }
-            isClustered = !isClustered;
-        }
+            // Create a link to the file
+            downloadLink.href = window.URL.createObjectURL(csvFile);
 
-        function goToHdV_Drummondville() {
-            if (HdV_Drummondville_Location) {
-                map.panTo(HdV_Drummondville_Location);
-                map.setZoom(15);
-            }
+            // Hide download link
+            downloadLink.style.display = "none";
+
+            // Add the link to DOM
+            document.body.appendChild(downloadLink);
+
+            // Click download link
+            downloadLink.click();
         }
     </script>
-<body onload="initMap()">
-    <div id="map"></div>
-    <div class="controls">
-        <button class="default-button" onclick="goToHdV_Drummondville()">Aller à Hôtel de Ville de Drummondville</button>
-        <div class="toggle-container">
-            <span>Activer le regroupement des points (clustering)</span>
-            <div id="toggle-cluster" class="toggle-button" onclick="toggleMarkerCluster()"></div>
-        </div>
-    </div>
-    <div class="slider-container">
-        <label for="radius-slider">Rayon considéré (km): <span id="radius-value">30</span></label>
-        <input type="range" id="radius-slider" class="slider" min="1" max="100" value="30" step="5" oninput="updateRadius(this.value)">
-    </div>
-    <div id="client-count" class="client-count"></div>
-    <script>
-        function updateRadius(value) {
-            document.getElementById('radius-value').innerText = value;
-            updateMarkers(value * 1000); // Convert km to meters
-        }
-    </script>
+</head>
+<bodyMap()">
+    <h1>Updating CSV with Distances...</h1>
 </body>
 </html>
