@@ -173,12 +173,13 @@
 
         function updateMarkers(radius) {
             var activeClients = 0;
-            markers.forEach(marker => marker.setVisible(false)); // Hide all markers
 
             allClients.forEach(function(client, index) {
                 if (client.distanceToHdV <= radius) {
                     markers[index].setVisible(true); // Show marker
                     activeClients++;
+                } else {
+                    markers[index].setVisible(false); // Hide marker
                 }
             });
 
