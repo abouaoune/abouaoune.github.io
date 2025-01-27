@@ -102,11 +102,11 @@
                 fillOpacity: 0.20,
                 map: map,
                 center: {lat: 45.880662, lng: -72.484140},
-                radius: 50000 // 30 km
+                radius: 30000 // 30 km
             });
 
             // Load CSV data
-            Papa.parse('CL_Drummondville_MapData_200.csv', {
+            Papa.parse('CL_Drummondville_MapData.csv', {
                 download: true,
                 header: true,
                 complete: function(results) {
@@ -139,7 +139,7 @@
                             var distanceToHdV = google.maps.geometry.spherical.computeDistanceBetween(latLng, HdV_Drummondville_Location);
 
                             // Check if within 50 km
-                            if (distanceToHdV <= 50000) {
+                            if (distanceToHdV <= 30000) {
                                 var marker = new google.maps.Marker({
                                     position: latLng,
                                     title: 'P' + client.User + ' - ' + client.PostalCode,
