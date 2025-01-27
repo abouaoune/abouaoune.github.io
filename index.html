@@ -125,12 +125,12 @@
 
                     data.forEach(function(client) {
                         var lat = parseFloat(client.Latitude);
-                        console.log('client.Latitude = ', client.Latitude)
-                        console.log('lat =', lat)
+                        //console.log('client.Latitude = ', client.Latitude)
+                        //console.log('lat =', lat)
 
                         var lng = parseFloat(client.Longitude);
-                        console.log('client.Latitude = ', client.Longitude)
-                        console.log('lng =', lng)
+                        //console.log('client.Latitude = ', client.Longitude)
+                        //console.log('lng =', lng)
 
                         if (!isNaN(lat) && !isNaN(lng)) {
                             var latLng = new google.maps.LatLng(lat, lng);
@@ -159,9 +159,9 @@
                                 marker.setMap(map); // Add marker to the map directly
                                 activeClients++;
                             }
-                        } else {
+                        } /*else {
                             console.error('Invalid coordinates for client:', client);
-                        }
+                        }*/
                     });
 
                     // Initialize MarkerClusterer
