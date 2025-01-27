@@ -164,22 +164,22 @@
                             allClients.push({ ...client, distanceToHdV });
                         }
                     });
-
-                    // Update markers based on initial radius
-                    updateMarkers(circle.getRadius());
                 }
             });
+
+            // Update markers based on initial radius
+            updateMarkers(circle.getRadius());
         }
 
         function updateMarkers(radius) {
             var activeClients = 0;
 
             allClients.forEach(function(client, index) {
-                if (client.distanceToHdV <= radius) {
+                if (client.distanceToHdV >= radius) {
+                    markers[index].setVisible(false); // Hide marker
+                } else {
                     markers[index].setVisible(true); // Show marker
                     activeClients++;
-                } else {
-                    markers[index].setVisible(false); // Hide marker
                 }
             });
 
@@ -227,11 +227,6 @@
                 map.panTo(HdV_Drummondville_Location);
                 map.setZoom(15);
             }
-        }
-
-        // Ensure markers are visible based on initial radius when the map loads
-        window.onload = function() {
-            updateMarkers(30000);
         }
     </script>
 </head>
