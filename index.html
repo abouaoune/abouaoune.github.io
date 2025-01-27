@@ -70,6 +70,9 @@
         .slider {
             width: 300px;
         }
+        .bold {
+            font-weight: bold;
+        }
     </style>
     <script>
         var map;
@@ -83,6 +86,7 @@
         var debounceTimeout;
 
         function initMap() {
+
             map = new google.maps.Map(document.getElementById('map'), {
                 zoom: 12,
                 center: {lat: 45.880662, lng: -72.484140} // Center the map at an initial location
@@ -161,13 +165,6 @@
                         }
                     });
 
-                    // Initialize MarkerClusterer
-                    markerCluster = new markerClusterer.MarkerClusterer({
-                        map: map,
-                        markers: markers.filter(marker => marker.getVisible()), // Start with visible markers
-                        gridSize: 80 // Increase the radius for forming clusters
-                    });
-
                     // Update markers based on initial radius
                     updateMarkers(circle.getRadius());
                 }
@@ -236,8 +233,8 @@
         </div>
     </div>
     <div class="slider-container">
-        <label for="radius-slider">Rayon considéré (km): <span id="radius-value">30</span></label>
-        <input type="range" id="radius-slider" class="slider" min="1" max="100" value="30" step="5" oninput="updateRadius(this.value)">
+        <label for="radius-slider">Rayon considéré (km): <span id="radius-value" class="bold">30</span></label>
+        <input type="range" id="radius-slider" class="slider" min="5" max="100" value="30" step="5" oninput="updateRadius(this.value)">
     </div>
     <div id="client-count" class="client-count"></div>
     <script>
