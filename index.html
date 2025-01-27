@@ -164,11 +164,11 @@
                             allClients.push({ ...client, distanceToHdV });
                         }
                     });
+                    
+                    // Update markers based on initial radius
+                    updateMarkers(circle.getRadius());
                 }
             });
-
-            // Update markers based on initial radius
-            updateMarkers(circle.getRadius());
         }
 
         function updateMarkers(radius) {
