@@ -10,7 +10,7 @@
             font-family: Calibri, sans-serif;
         }
         #map {
-            height: 600px;
+            height: 500px;
             width: 100%;
         }
         .controls {
@@ -164,7 +164,7 @@
                     // Initialize MarkerClusterer
                     markerCluster = new markerClusterer.MarkerClusterer({
                         map: map,
-                        markers: [], // Start with clustering disabled
+                        markers: markers.filter(marker => marker.getVisible()), // Start with visible markers
                         gridSize: 80 // Increase the radius for forming clusters
                     });
 
@@ -190,6 +190,12 @@
 
             // Display the number of active clients
             document.getElementById('client-count').innerText = 'Patient actifs (RV < 2 ans): ' + activeClients;
+
+            // Update marker cluster
+            if (isClustered) {
+                markerCluster.clearMarkers();
+                markerCluster.addMarkers(markers.filter(marker => marker.getVisible()));
+            }
         }
 
         function debounceUpdateMarkers(radius) {
@@ -205,7 +211,7 @@
                 toggleButton.classList.remove('on');
             } else {
                 markers.forEach(marker => marker.setMap(null));
-                markerCluster.addMarkers(markers.filter(marker => marker !== HdV_Drummondville_Marker));
+                markerCluster.addMarkers(markers.filter(marker => marker.getVisible()));
                 HdV_Drummondville_Marker.setMap(map); // Ensure new store marker is always visible
                 toggleButton.classList.add('on');
             }
@@ -231,8 +237,14 @@
     </div>
     <div class="slider-container">
         <label for="radius-slider">Rayon considéré (km): <span id="radius-value">30</span></label>
-        <input type="range" id="radius-slider" class="slider" min="1" max="100" value="30" step="5" oninput="debounceUpdateMarkers(this.value * 1000)">
+        <input type="range" id="radius-slider" class="slider" min="1" max="100" value="30" step="5" oninput="updateRadius(this.value)">
     </div>
     <div id="client-count" class="client-count"></div>
+    <script>
+        function updateRadius(value) {
+            document.getElementById('radius-value').innerText = value;
+            debounceUpdateMarkers(value * 1000); // Convert km to meters
+        }
+    </script>
 </body>
 </html>
