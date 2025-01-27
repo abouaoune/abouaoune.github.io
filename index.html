@@ -96,7 +96,7 @@
             // Add circle to map
             var circle = new google.maps.Circle({
                 strokeColor: '#FF0000',
-                strokeOpacity: 0.8,
+                strokeOpacity: 0.6,
                 strokeWeight: 2,
                 fillColor: '#FF0000',
                 fillOpacity: 0.35,
@@ -139,7 +139,7 @@
                             var distanceToHdV = google.maps.geometry.spherical.computeDistanceBetween(latLng, HdV_Drummondville_Location);
 
                             // Check if within 50 km
-                            if (distanceToHdV <= 30000) {
+                            if (distanceToHdV <= 40000) {
                                 var marker = new google.maps.Marker({
                                     position: latLng,
                                     title: 'P' + client.User + ' - ' + client.PostalCode,
