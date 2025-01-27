@@ -227,6 +227,11 @@
                 map.setZoom(15);
             }
         }
+
+        // Ensure markers are visible based on initial radius when the map loads
+        window.onload = function() {
+            updateMarkers(30000);
+        }
     </script>
 </head>
 <body onload="initMap()">
